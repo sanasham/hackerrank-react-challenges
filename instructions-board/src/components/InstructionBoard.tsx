@@ -1,159 +1,82 @@
 import React, { useState } from "react";
+import { AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
+import "./InstructionStyle.css";
 
 interface Instruction {
   id: number;
-  text: string;
+  instruction: string;
 }
 
-const InstructionsBoard: React.FC = () => {
+const InstructionBoard = () => {
   const [instructions, setInstructions] = useState<Instruction[]>([]);
-
   const [newInstruction, setNewInstruction] = useState<string>("");
 
-  // Add a new instruction
-  const addInstruction = () => {
-    if (newInstruction.trim()) {
-      setInstructions([
-        ...instructions,
-        { id: instructions.length + 1, text: newInstruction },
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewInstruction(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (newInstruction) {
+      setInstructions((prev) => [
+        ...prev,
+        {
+          id: prev.length ? prev[prev.length - 1].id + 1 : 1,
+          instruction: newInstruction,
+        },
       ]);
       setNewInstruction("");
     }
   };
 
-  // Move instruction up
-  const moveUp = (index: number) => {
-    if (index > 0) {
+  const moveUp = (id: number) => {
+    if (id > 0) {
       const updated = [...instructions];
-      [updated[index - 1], updated[index]] = [
-        updated[index],
-        updated[index - 1],
-      ];
+      [updated[id - 1], updated[id]] = [updated[id], updated[id - 1]];
       setInstructions(updated);
     }
   };
 
-  // Move instruction down
-  const moveDown = (index: number) => {
-    if (index < instructions.length - 1) {
+  const moveDown = (id: number) => {
+    if (id < instructions.length - 1) {
       const updated = [...instructions];
-      [updated[index], updated[index + 1]] = [
-        updated[index + 1],
-        updated[index],
-      ];
+      [updated[id + 1], updated[id]] = [updated[id], updated[id + 1]];
       setInstructions(updated);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Instructions Board</h1>
-      <div style={styles.form}>
+    <div className="container">
+      <form className="main-section" onSubmit={handleSubmit}>
         <input
           type="text"
           value={newInstruction}
-          onChange={(e) => setNewInstruction(e.target.value)}
-          placeholder="Enter a new instruction"
-          style={styles.input}
+          onChange={handleChange}
+          placeholder="Enter new instruction"
         />
-        <button onClick={addInstruction} style={styles.addButton}>
-          Add
-        </button>
-      </div>
-      <ul style={styles.list}>
-        {instructions.map((instruction, index) => (
-          <li key={instruction.id} style={styles.item}>
-            <span>
-              {instruction.id}. {instruction.text}
-            </span>
-            <div style={styles.buttons}>
-              <button
-                style={styles.button}
-                onClick={() => moveUp(index)}
-                disabled={index === 0}
-              >
-                Move Up
-              </button>
-              <button
-                style={styles.button}
-                onClick={() => moveDown(index)}
-                disabled={index === instructions.length - 1}
-              >
-                Move Down
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+        <button type="submit">Add Instruction</button>
+      </form>
+      {instructions.length > 0 && (
+        <div className="items-section">
+          <ul>
+            {instructions.map((item, index) => (
+              <li className="items" key={item.id}>
+                <span className="instruction-text">{item.instruction}</span>
+                <div className="icons">
+                  <span onClick={() => moveDown(index)}>
+                    <AiFillCaretDown />
+                  </span>
+                  <span onClick={() => moveUp(index)}>
+                    <AiFillCaretUp />
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
 
-const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-  },
-  title: {
-    fontSize: "24px",
-    textAlign: "center" as const,
-    marginBottom: "20px",
-  },
-  list: {
-    listStyleType: "none",
-    padding: 0,
-  },
-  item: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#f9f9f9",
-    padding: "10px",
-    marginBottom: "10px",
-    borderRadius: "4px",
-    border: "1px solid #ddd",
-  },
-  buttons: {
-    display: "flex",
-    gap: "10px",
-  },
-  button: {
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    padding: "5px 10px",
-    cursor: "pointer",
-    borderRadius: "4px",
-    fontSize: "12px",
-    disabled: {
-      backgroundColor: "#ccc",
-    },
-  },
-  form: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: "20px",
-  },
-  input: {
-    flex: 1,
-    marginRight: "10px",
-    padding: "8px",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-  },
-  addButton: {
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    padding: "8px 15px",
-    cursor: "pointer",
-    borderRadius: "4px",
-  },
-};
-
-export default InstructionsBoard;
+export default InstructionBoard;
